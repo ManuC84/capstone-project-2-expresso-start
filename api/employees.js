@@ -1,9 +1,13 @@
 const express = require("express");
 const employeesRouter = express.Router();
 const sqlite3 = require("sqlite3");
+const timesheetsRouter = require("./timesheets");
 const db = new sqlite3.Database(
   process.env.TEST_DATABASE || "./database.sqlite"
 );
+
+//MOUNT TIMESHEETS ROUTER
+employeesRouter.use("/:employeeId/timesheets", timesheetsRouter);
 
 //VALIDATE FUNCTION
 const validateEmployee = (req, res, next) => {
@@ -21,7 +25,6 @@ const validateEmployee = (req, res, next) => {
 
 //EMPLOYEE PARAMS
 employeesRouter.param("employeeId", (req, res, next, employeeId) => {
-  console.log(employeeId);
   db.get(`SELECT * FROM Employee WHERE id = ${employeeId}`, (err, id) => {
     if (err) {
       next(err);
