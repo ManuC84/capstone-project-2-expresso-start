@@ -74,4 +74,44 @@ timesheetsRouter.post("/", validateTimesheet, (req, res, next) => {
   });
 });
 
+//PUT TIMESHEETS HANDLER
+timesheetsRouter.put("/:timesheetId", validateTimesheet, (req, res, next) => {
+  const query = `UPDATE Timesheet SET hours = $hours, rate = $rate, date = $date, employee_id = $employeeId WHERE id = $timesheetId`;
+  const values = {
+    $hours: req.hours,
+    $rate: req.rate,
+    $date: req.date,
+    $employeeId: req.params.employeeId,
+    $timesheetId: req.params.timesheetId,
+  };
+  db.run(query, values, function (err) {
+    if (err) {
+      next(err);
+    } else {
+      db.get(
+        `SELECT * FROM Timesheet WHERE id = ${req.params.timesheetId}`,
+        (err, updatedTimesheet) => {
+          if (err) {
+            next(err);
+          } else {
+            res.status(200).json({ timesheet: updatedTimesheet });
+          }
+        }
+      );
+    }
+  });
+});
+
+//TIMESHEETS DELETE HANDLER
+timesheetsRouter.delete("/:timesheetId", (req, res, next) => {
+  const query = `DELETE FROM Timesheet WHERE id = ${req.params.timesheetId}`;
+  db.run(query, function (err) {
+    if (err) {
+      next(err);
+    } else {
+      res.sendStatus(204);
+    }
+  });
+});
+
 module.exports = timesheetsRouter;
